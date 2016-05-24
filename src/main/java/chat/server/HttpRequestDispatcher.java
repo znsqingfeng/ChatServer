@@ -7,7 +7,8 @@ import chat.enums.RequestURL;
 import chat.model.ClientUser;
 import chat.model.Message;
 import chat.model.UserVo;
-import chat.result.ObjectResult;
+import chat.result.AckMessage;
+import chat.result.ResultMessage;
 import chat.utils.RedisClient;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -28,7 +29,7 @@ public class HttpRequestDispatcher {
 
     public String dispatcher(IoSession session,HttpRequestMessage request){
 
-        ObjectResult result = null;
+        AckMessage result = null;
 
         switch (request.getUrl()){
             case RequestURL.Login:
@@ -64,13 +65,13 @@ public class HttpRequestDispatcher {
         return response.buildResponse();
     }
 
-    public ObjectResult notFound(String url){
-        ObjectResult result = new ObjectResult(false,"url '" + url + "' not found");
+    public AckMessage notFound(String url){
+        AckMessage result = new AckMessage(false,"url '" + url + "' not found");
 
         return result;
     }
 
-    public ObjectResult updateProfile(String body){
+    public AckMessage updateProfile(String body){
         JSONObject object = JSON.parseObject(body);
         long id = object.getLong("user_id");
         String avatar = object.getString("avatar");
@@ -81,20 +82,20 @@ public class HttpRequestDispatcher {
         user.NickName = nickName;
         user = userService.updateProfile(user);
 
-        ObjectResult result = new ObjectResult(true,UserVo.fromClientUser(user));
+        ResultMessage<UserVo> result = new ResultMessage<UserVo>(true,UserVo.fromClientUser(user));
 
         return result;
     }
 
-    public ObjectResult addFriend(String body){
+    public AckMessage addFriend(String body){
         //todo add friend
-        return new ObjectResult();
+        return new AckMessage();
     }
-    public ObjectResult deleteFriend(String body){
+    public AckMessage deleteFriend(String body){
         //todo delete friend
-        return new ObjectResult();
+        return new AckMessage();
     }
-    public ObjectResult login(IoSession session,String body){
+    public AckMessage login(IoSession session,String body){
         JSONObject object = JSON.parseObject(body);
         long userId = object.getLong("user_id");
         String value = object.getString("ticket");
@@ -114,44 +115,44 @@ public class HttpRequestDispatcher {
                         //通过seesionKey获取session
                         ClientUser tcp = serverModel.getUserFromIpTable(sessionKey);
                         if (tcp == null){
-                            return new ObjectResult(false,"user not connect");
+                            return new AckMessage(false,"user not connect");
                         }
                         IoSession tcpSession = tcp.ioSession;
                         serverModel.clientUserLogin(tcpSession,clientUser);
                         //todo 登录成功 处理离线消息
-                        return new ObjectResult(true,"login success");
+                        return new AckMessage(true,"login success");
                     }
                     else {
-                        return new ObjectResult(false,"error ticket");
+                        return new AckMessage(false,"error ticket");
                     }
                 }
                 else {
-                    return new ObjectResult(false,"error ticket");
+                    return new AckMessage(false,"error ticket");
                 }
             }
             else {
                 serverModel.removeUserFromIpTable(session);
-                return new ObjectResult(false,"user not found");
+                return new AckMessage(false,"user not found");
             }
         }catch (Exception e){
             logger.error("check value error",e);
         }finally {
             RedisClient.returnResource(jedis);
         }
-        return new ObjectResult();
+        return new AckMessage();
     }
-    public ObjectResult joinGroup(String body){
+    public AckMessage joinGroup(String body){
         //todo join group
-        return new ObjectResult();
+        return new AckMessage();
     }
-    public ObjectResult leaveGroup(String body){
+    public AckMessage leaveGroup(String body){
         //todo leave group
-        return new ObjectResult();
+        return new AckMessage();
     }
 
-    public ObjectResult friendList(String body){
+    public AckMessage friendList(String body){
         //todo 先获取用户的好友 再校验是否在线
-        return new ObjectResult();
+        return new AckMessage();
     }
 
 

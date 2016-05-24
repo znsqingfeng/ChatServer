@@ -5,7 +5,6 @@ import chat.enums.MessageTypes;
 import chat.exception.ServerException;
 import chat.model.ClientUser;
 import chat.model.Message;
-import chat.result.ObjectResult;
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
